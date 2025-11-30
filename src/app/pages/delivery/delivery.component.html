@@ -1,0 +1,327 @@
+<div class="delivery-container">
+  <!-- Header -->
+  <div class="delivery-header">
+    <div class="header-content">
+      <div class="deliverer-info">
+        <div class="avatar">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="info">
+          <h1>{{ deliveryName }}</h1>
+          <p class="online-status">🟢 Online & Ready</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">{{ completedDeliveries }}</div>
+          <div class="stat-label">Deliveries Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ totalEarnings | number:'1.2-2' }} DT</div>
+          <div class="stat-label">Total Earnings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ rating }}</div>
+          <div class="stat-label">Rating</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-navigation">
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'pending'"
+      (click)="selectedTab = 'pending'"
+    >
+      <span class="badge-counter">{{ pendingOrders.length }}</span>
+      Pending Orders
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'accepted'"
+      (click)="selectedTab = 'accepted'"
+    >
+      <span class="badge-counter">{{ acceptedOrders.length }}</span>
+      In Progress
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedTab === 'delivered'"
+      (click)="selectedTab = 'delivered'"
+    >
+      <span class="badge-counter">{{ deliveredOrders.length }}</span>
+      Completed
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="delivery-content">
+    <!-- Pending Orders -->
+    <div *ngIf="selectedTab === 'pending'" class="orders-section">
+      <h2>New Orders</h2>
+      
+      <div *ngIf="pendingOrders.length === 0" class="empty-state">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 6H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"></path>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <p>No pending orders</p>
+      </div>
+
+      <div *ngFor="let order of pendingOrders" class="order-card pending">
+        <div class="order-content" (click)="selectOrder(order)">
+          <div class="order-header">
+            <div class="order-id">{{ order.id }}</div>
+            <div [class]="'badge ' + getStatusBadgeClass(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </div>
+          </div>
+
+          <div class="order-details">
+            <div class="store-info">
+              <h3>{{ order.storeName }}</h3>
+              <p class="store-address">🏪 {{ order.storeAddress }}</p>
+            </div>
+
+            <div class="customer-info">
+              <h3>{{ order.customer }}</h3>
+              <p class="phone">📞 {{ order.phone }}</p>
+              <p class="address">📍 {{ order.address }}</p>
+            </div>
+
+            <div class="items">
+              <p class="items-label">Items:</p>
+              <ul>
+                <li *ngFor="let item of order.items">{{ item }}</li>
+              </ul>
+            </div>
+
+            <div class="order-amount">
+              <div class="amount">{{ order.amount | number:'1.2-2' }} DT</div>
+              <div class="time">{{ order.createdAt | date:'short' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-actions">
+          <button class="btn btn-accept" (click)="acceptOrder(order.id)">Accept Order</button>
+          <button class="btn btn-reject" (click)="rejectOrder(order.id)">Reject</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accepted/In Progress Orders -->
+    <div *ngIf="selectedTab === 'accepted'" class="orders-section">
+      <h2>Orders In Progress</h2>
+
+      <div *ngIf="acceptedOrders.length === 0" class="empty-state">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 6H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"></path>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <p>No orders in progress</p>
+      </div>
+
+      <div *ngFor="let order of acceptedOrders" class="order-card accepted">
+        <div class="order-content" (click)="selectOrder(order)">
+          <div class="order-header">
+            <div class="order-id">{{ order.id }}</div>
+            <div [class]="'badge ' + getStatusBadgeClass(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </div>
+          </div>
+
+          <div class="order-details">
+            <div class="store-info">
+              <h3>{{ order.storeName }}</h3>
+              <p class="store-address">🏪 {{ order.storeAddress }}</p>
+            </div>
+
+            <div class="customer-info">
+              <h3>{{ order.customer }}</h3>
+              <p class="phone">📞 {{ order.phone }}</p>
+              <p class="address">📍 {{ order.address }}</p>
+            </div>
+
+            <div class="items">
+              <p class="items-label">Items:</p>
+              <ul>
+                <li *ngFor="let item of order.items">{{ item }}</li>
+              </ul>
+            </div>
+
+            <div class="order-amount">
+              <div class="amount">{{ order.amount | number:'1.2-2' }} DT</div>
+              <div class="time">{{ order.createdAt | date:'short' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-actions">
+          <button *ngIf="order.status === 'accepted'" class="btn btn-pickup" (click)="pickupOrder(order.id)">
+            Mark as Picked Up
+          </button>
+          <button *ngIf="order.status === 'picked_up'" class="btn btn-deliver" (click)="completeDelivery(order.id)">
+            Mark as Delivered
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivered Orders -->
+    <div *ngIf="selectedTab === 'delivered'" class="orders-section">
+      <h2>Completed Deliveries</h2>
+
+      <div *ngIf="deliveredOrders.length === 0" class="empty-state">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 6H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"></path>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <p>No completed deliveries yet</p>
+      </div>
+
+      <div *ngFor="let order of deliveredOrders" class="order-card delivered">
+        <div class="order-content" (click)="selectOrder(order)">
+          <div class="order-header">
+            <div class="order-id">{{ order.id }}</div>
+            <div [class]="'badge ' + getStatusBadgeClass(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </div>
+          </div>
+
+          <div class="order-details">
+            <div class="store-info">
+              <h3>{{ order.storeName }}</h3>
+              <p class="store-address">🏪 {{ order.storeAddress }}</p>
+            </div>
+
+            <div class="customer-info">
+              <h3>{{ order.customer }}</h3>
+              <p class="phone">📞 {{ order.phone }}</p>
+              <p class="address">📍 {{ order.address }}</p>
+            </div>
+
+            <div class="items">
+              <p class="items-label">Items:</p>
+              <ul>
+                <li *ngFor="let item of order.items">{{ item }}</li>
+              </ul>
+            </div>
+
+            <div class="order-amount">
+              <div class="amount">{{ order.amount | number:'1.2-2' }} DT</div>
+              <div class="time">{{ order.createdAt | date:'short' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-status-complete">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Delivered</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Details Modal -->
+<div *ngIf="showModal && selectedOrder" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Order Details</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Order ID and Status -->
+      <div class="detail-row">
+        <div class="detail-column">
+          <label>Order ID</label>
+          <p class="value">{{ selectedOrder.id }}</p>
+        </div>
+        <div class="detail-column">
+          <label>Status</label>
+          <p [class]="'value badge ' + getStatusBadgeClass(selectedOrder.status)">
+            {{ getStatusLabel(selectedOrder.status) }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Store Information -->
+      <div class="section">
+        <h3>Store Information</h3>
+        <div class="detail-column full">
+          <label>Store Name</label>
+          <p class="value">{{ selectedOrder.storeName }}</p>
+        </div>
+        <div class="detail-column full">
+          <label>Store Address</label>
+          <p class="value">{{ selectedOrder.storeAddress }}</p>
+        </div>
+      </div>
+
+      <!-- Customer Information -->
+      <div class="section">
+        <h3>Customer Information</h3>
+        <div class="detail-row">
+          <div class="detail-column">
+            <label>Name</label>
+            <p class="value">{{ selectedOrder.customer }}</p>
+          </div>
+          <div class="detail-column">
+            <label>Phone</label>
+            <p class="value">{{ selectedOrder.phone }}</p>
+          </div>
+        </div>
+        <div class="detail-column full">
+          <label>Delivery Address</label>
+          <p class="value">{{ selectedOrder.address }}</p>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="section">
+        <h3>Items</h3>
+        <ul class="items-list">
+          <li *ngFor="let item of selectedOrder.items" class="item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            {{ item }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Order Amount and Time -->
+      <div class="section">
+        <div class="detail-row">
+          <div class="detail-column">
+            <label>Order Amount</label>
+            <p class="value amount">{{ selectedOrder.amount | number:'1.2-2' }} DT</p>
+          </div>
+          <div class="detail-column">
+            <label>Order Time</label>
+            <p class="value">{{ selectedOrder.createdAt | date:'medium' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>

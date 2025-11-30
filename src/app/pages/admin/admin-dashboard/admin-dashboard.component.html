@@ -1,0 +1,172 @@
+<div class="admin-dashboard">
+  <!-- Header Admin -->
+  <div class="admin-header">
+    <h1><i class="fas fa-tachometer-alt"></i> Tableau de Bord Admin</h1>
+    <p>Gérez votre plateforme de livraison</p>
+  </div>
+
+  <!-- Statistiques principales -->
+  <div class="stats-grid">
+    <div class="stat-card users">
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ stats.totalUsers | number }}</h3>
+        <p>Utilisateurs</p>
+        <span class="stat-trend positive">+5.2%</span>
+      </div>
+    </div>
+
+    <div class="stat-card orders">
+      <div class="stat-icon">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ stats.totalOrders | number }}</h3>
+        <p>Commandes</p>
+        <span class="stat-trend positive">+12.4%</span>
+      </div>
+    </div>
+
+    <div class="stat-card revenue">
+      <div class="stat-icon">
+        <i class="fas fa-euro-sign"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ stats.totalRevenue | currency:'EUR':'symbol':'1.2-2' }}</h3>
+        <p>Chiffre d'affaires</p>
+        <span class="stat-trend positive">+8.7%</span>
+      </div>
+    </div>
+
+    <div class="stat-card deliveries">
+      <div class="stat-icon">
+        <i class="fas fa-truck"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ stats.activeDeliveries }}</h3>
+        <p>Livraisons actives</p>
+        <span class="stat-trend neutral">{{ stats.pendingOrders }} en attente</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions rapides -->
+  <div class="quick-actions-section">
+    <h2><i class="fas fa-bolt"></i> Actions Rapides</h2>
+    <div class="quick-actions">
+      <a 
+        *ngFor="let action of quickActions" 
+        [routerLink]="action.route" 
+        class="action-btn"
+        [style.background]="action.color">
+        <i [class]="action.icon"></i>
+        <span>{{ action.title }}</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <!-- Commandes récentes -->
+    <div class="recent-orders">
+      <div class="section-header">
+        <h2><i class="fas fa-clock"></i> Commandes Récentes</h2>
+        <a routerLink="/admin/orders" class="view-all-btn">Voir tout</a>
+      </div>
+      
+      <div class="orders-table">
+        <div class="table-header">
+          <div class="col-id">ID</div>
+          <div class="col-user">Client</div>
+          <div class="col-total">Total</div>
+          <div class="col-status">Statut</div>
+          <div class="col-time">Heure</div>
+          <div class="col-actions">Actions</div>
+        </div>
+        
+        <div class="table-row" *ngFor="let order of recentOrders">
+          <div class="col-id">#{{ order.id }}</div>
+          <div class="col-user">
+            <div class="user-info">
+              <strong>{{ order.userName }}</strong>
+              <small>{{ order.items }} article(s)</small>
+            </div>
+          </div>
+          <div class="col-total">{{ order.total | currency:'EUR':'symbol':'1.2-2' }}</div>
+          <div class="col-status">
+            <span 
+              class="status-badge" 
+              [style.background-color]="getStatusColor(order.status)">
+              {{ getStatusText(order.status) }}
+            </span>
+          </div>
+          <div class="col-time">{{ order.createdAt | date:'HH:mm' }}</div>
+          <div class="col-actions">
+            <button class="action-icon-btn view" title="Voir">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-icon-btn edit" title="Modifier">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nouveaux utilisateurs -->
+    <div class="recent-users">
+      <div class="section-header">
+        <h2><i class="fas fa-user-plus"></i> Nouveaux Utilisateurs</h2>
+        <a routerLink="/admin/users" class="view-all-btn">Voir tout</a>
+      </div>
+      
+      <div class="users-list">
+        <div class="user-card" *ngFor="let user of recentUsers">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-details">
+            <h4>{{ user.name }}</h4>
+            <p>{{ user.email }}</p>
+            <div class="user-meta">
+              <span 
+                class="role-badge" 
+                [style.background-color]="getRoleColor(user.role)">
+                {{ user.role }}
+              </span>
+              <span class="join-date">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+          <div class="user-status">
+            <span 
+              class="status-indicator" 
+              [class.active]="user.status === 'actif'"
+              [class.inactive]="user.status === 'inactif'">
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques et analytics -->
+  <div class="analytics-section">
+    <div class="chart-container">
+      <h3><i class="fas fa-chart-line"></i> Évolution des ventes</h3>
+      <div class="chart-placeholder">
+        <p>Graphique des ventes (à intégrer)</p>
+        <i class="fas fa-chart-area"></i>
+      </div>
+    </div>
+    
+    <div class="chart-container">
+      <h3><i class="fas fa-pie-chart"></i> Répartition par catégorie</h3>
+      <div class="chart-placeholder">
+        <p>Graphique en secteurs (à intégrer)</p>
+        <i class="fas fa-chart-pie"></i>
+      </div>
+    </div>
+  </div>
+</div>

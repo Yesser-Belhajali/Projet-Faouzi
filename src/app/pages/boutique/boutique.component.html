@@ -1,0 +1,84 @@
+<div class="boutique-page">
+  <!-- En-tête de la page -->
+  <div class="page-header">
+    <h1><i class="fas fa-shopping-bag"></i> Boutique</h1>
+    <p>Découvrez nos produits tendance</p>
+  </div>
+
+  <!-- Filtres par catégorie -->
+  <div class="category-filters">
+    <button 
+      *ngFor="let category of categories"
+      class="filter-btn"
+      [class.active]="selectedCategory === category"
+      (click)="filterByCategory(category)">
+      {{ category }}
+    </button>
+  </div>
+
+  <!-- Grille de produits -->
+  <div class="products-grid">
+    <div class="product-card" *ngFor="let product of filteredProducts">
+      <div class="product-image">
+        <img [src]="product.image" [alt]="product.name" />
+        <div class="product-overlay">
+          <button class="quick-view-btn">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="product-info">
+        <div class="product-store">{{ product.store }}</div>
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-description">{{ product.description }}</p>
+        <div class="product-meta">
+          <span class="product-category">{{ product.category }}</span>
+          <div class="product-price">{{ product.price | currency:'EUR':'symbol':'1.2-2' }}</div>
+        </div>
+        
+        <button 
+          class="add-to-cart-btn"
+          (click)="addToCart(product)">
+          <i class="fas fa-cart-plus"></i>
+          Ajouter au panier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panier flottant -->
+  <div class="floating-cart" *ngIf="getTotalItems() > 0">
+    <div class="cart-summary">
+      <div class="cart-info">
+        <span class="cart-items">{{ getTotalItems() }} article(s)</span>
+        <span class="cart-total">{{ getTotalPrice() | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+      <button class="checkout-btn" routerLink="/checkout">
+        <i class="fas fa-shopping-cart"></i>
+        Voir le panier
+      </button>
+    </div>
+    
+    <!-- Liste des articles dans le panier -->
+    <div class="cart-items-list">
+      <div class="cart-item" *ngFor="let item of cart">
+        <img [src]="item.image" [alt]="item.name" class="cart-item-image">
+        <div class="cart-item-info">
+          <span class="cart-item-name">{{ item.name }}</span>
+          <span class="cart-item-price">{{ item.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+        <button class="remove-item-btn" (click)="removeFromCart(item)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun produit -->
+  <div class="empty-state" *ngIf="filteredProducts.length === 0">
+    <i class="fas fa-shopping-bag"></i>
+    <h3>Aucun produit trouvé</h3>
+    <p>Essayez de changer votre filtre de catégorie</p>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<div class="restaurant-page">
+  <div class="header-section">
+    <div class="container">
+      <div class="page-header">
+        <h1>🍽️ Restaurants</h1>
+        <p>Découvrez nos délicieux plats livrés directement chez vous</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div class="container">
+      <div class="products-grid">
+        <div *ngFor="let product of products" class="product-card">
+          <div class="product-image">{{ product.image }}</div>
+          
+          <div class="product-info">
+            <span class="restaurant-name">{{ product.restaurant }}</span>
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-description">{{ product.description }}</p>
+            
+            <div class="product-footer">
+              <div class="price">{{ product.price | number:'1.2-2' }} DT</div>
+              <button 
+                class="add-to-cart-btn"
+                (click)="addToCart(product)"
+              >
+                Ajouter au panier
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panier flottant -->
+  <div class="floating-cart" *ngIf="cartItems.length > 0">
+    <div class="cart-summary">
+      <span class="cart-count">{{ cartItems.length }} article(s)</span>
+      <span class="cart-total">{{ getTotalPrice() | number:'1.2-2' }} DT</span>
+      <button class="checkout-btn">Commander</button>
+    </div>
+  </div>
+</div>
