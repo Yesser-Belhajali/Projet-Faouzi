@@ -31,6 +31,10 @@ export const routes: Routes = [
     path: 'admin', 
     loadChildren: () => import('./pages/admin/admin.routes').then(m => m.routes)
   },
+  { 
+    path: 'user-management', 
+    loadComponent: () => import('./pages/user-management/user-management.component').then(m => m.UserManagementComponent)
+  },
   // Legacy redirects
   { path: 'pharmacy', redirectTo: '/pharmacie' },
   { path: 'grocery', redirectTo: '/courses' },

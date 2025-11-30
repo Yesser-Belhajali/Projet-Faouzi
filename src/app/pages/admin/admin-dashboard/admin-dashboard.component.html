@@ -1,9 +1,40 @@
-<div class="admin-dashboard">
-  <!-- Header Admin -->
-  <div class="admin-header">
-    <h1><i class="fas fa-tachometer-alt"></i> Tableau de Bord Admin</h1>
-    <p>Gérez votre plateforme de livraison</p>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Admin Panel</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a routerLink="/admin/products" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-text">Product</span>
+      </a>
+      <a routerLink="/admin/orders" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Orders</span>
+      </a>
+      <a routerLink="/user-management" routerLinkActive="active" class="nav-item users-nav">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Users</span>
+      </a>
+      <a routerLink="/admin/stats" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Stats</span>
+      </a>
+    </nav>
   </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="admin-header">
+      <h1><i class="fas fa-tachometer-alt"></i> Tableau de Bord Admin</h1>
+      <p>Gérez votre plateforme de livraison</p>
+    </div>
 
   <!-- Statistiques principales -->
   <div class="stats-grid">
@@ -68,7 +99,7 @@
   </div>
 
   <!-- Contenu principal -->
-  <div class="main-content">
+  <div class="dashboard-content">
     <!-- Commandes récentes -->
     <div class="recent-orders">
       <div class="section-header">
