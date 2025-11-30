@@ -1,0 +1,106 @@
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Admin Panel</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a routerLink="/admin/products" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-text">Product</span>
+      </a>
+      <a routerLink="/admin/orders" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-text">Orders</span>
+      </a>
+      <a routerLink="/user-management" routerLinkActive="active" class="nav-item users-nav">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Users</span>
+      </a>
+      <a routerLink="/admin/stats" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Stats</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="user-management-container">
+      <div class="header">
+        <h1>User Management</h1>
+        <div class="header-actions">
+          <button class="btn-add" (click)="addNewUser()">
+            <span class="add-icon">+</span>
+            Add New User
+          </button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="search-box">
+          <input 
+            type="text" 
+            placeholder="Search users..." 
+            [(ngModel)]="searchTerm"
+            class="search-input"
+          >
+          <span class="search-icon">🔍</span>
+        </div>
+        
+        <select [(ngModel)]="selectedRole" class="role-filter">
+          <option value="all">All Roles</option>
+          <option value="customer">Customer</option>
+          <option value="delivery partner">Delivery Partner</option>
+          <option value="provider">Provider</option>
+        </select>
+      </div>
+
+      <div class="users-table-container">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Phone</th>
+              <th>Registration Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers" class="user-row">
+              <td class="user-id">{{ user.id }}</td>
+              <td class="user-name">{{ user.name }}</td>
+              <td class="user-email">{{ user.email }}</td>
+              <td class="user-role">
+                <span class="role-badge" [class]="'role-' + user.role.toLowerCase().replace(' ', '-')">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="user-phone">{{ user.phone }}</td>
+              <td class="user-date">{{ user.registrationDate }}</td>
+              <td class="user-actions">
+                <button class="action-btn edit-btn" (click)="editUser(user.id)" title="Edit User">
+                  <span class="icon">👤</span>
+                </button>
+                <button class="action-btn delete-btn" (click)="deleteUser(user.id)" title="Delete User">
+                  <span class="icon">🗑️</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span class="results-count">Showing {{ filteredUsers.length }} users</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -79,6 +79,8 @@
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
+
+
 .navigation a.admin-link.active::after {
   display: none;
 }
