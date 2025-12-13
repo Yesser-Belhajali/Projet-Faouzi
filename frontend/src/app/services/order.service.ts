@@ -1,0 +1,84 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
+export interface OrderItem {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: number;
+  userId: number;
+  userName: string;
+  items: OrderItem[];
+  total: number;
+  status: string;
+  createdAt: Date;
+}
+
+export interface OrdersResponse {
+  orders: Order[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface CreateOrderRequest {
+  userId: number;
+  userName: string;
+  items: OrderItem[];
+  total: number;
+}
+
+export interface OrderStats {
+  totalOrders: number;
+  pendingOrders: number;
+  completedOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class OrderService {
+  private apiUrl = `${environment.apiUrl}/orders`;
+
+  constructor(private http: HttpClient) {}
+
+  getOrders(filters?: {
+    status?: string;
+    userId?: number;
+    page?: number;
+    limit?: number;
+  }): Observable<OrdersResponse> {
+    let params = new HttpParams();
+    
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.userId) params = params.set('userId', filters.userId.toString());
+    if (filters?.page) params = params.set('page', filters.page.toString());
+    if (filters?.limit) params = params.set('limit', filters.limit.toString());
+
+    return this.http.get<OrdersResponse>(this.apiUrl, { params });
+  }
+
+  getOrderById(id: number): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/${id}`);
+  }
+
+  createOrder(order: CreateOrderRequest): Observable<Order> {
+    return this.http.post<Order>(this.apiUrl, order);
+  }
+
+  updateOrderStatus(id: number, status: string): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}/status`, { status });
+  }
+
+  getOrderStats(): Observable<OrderStats> {
+    return this.http.get<OrderStats>(`${this.apiUrl}/stats/summary`);
+  }
+}

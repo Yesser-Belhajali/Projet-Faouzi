@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-signup',
@@ -38,7 +39,10 @@ export class SignupComponent {
     'Full Day (24/7)'
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   onSubmit() {
     // Validation based on account type
@@ -82,15 +86,28 @@ export class SignupComponent {
       }
     }
     
-    console.log('Sign up attempt:', signupData);
+    const name = this.accountType === 'provider' ? this.storeName : `${this.firstName} ${this.lastName}`;
     
-    // Simulate API call
-    setTimeout(() => {
-      this.isLoading = false;
-      const name = this.accountType === 'provider' ? this.storeName : `${this.firstName} ${this.lastName}`;
-      alert(`Account created successfully for ${name}!`);
-      // Redirect to home page
-      this.router.navigate(['/home']);
-    }, 1000);
+    this.authService.register({
+      name: name,
+      email: this.email,
+      password: this.password,
+      role: this.accountType === 'delivery' ? 'livreur' : 'client'
+    }).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success) {
+          alert(`Account created successfully for ${name}!`);
+          this.router.navigate(['/signin']);
+        } else {
+          alert('Registration failed. Please try again.');
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Registration error:', error);
+        alert('Registration failed. Please try again.');
+      }
+    });
   }
 }

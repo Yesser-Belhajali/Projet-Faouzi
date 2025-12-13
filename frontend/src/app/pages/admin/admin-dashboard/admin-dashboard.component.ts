@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AdminService } from '../../../services/admin.service';
 
 interface User {
   id: number;
@@ -37,14 +38,16 @@ interface Stats {
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
   stats: Stats = {
-    totalUsers: 25100, // Product in stock
-    totalOrders: 43500, // Orders delivered
-    totalRevenue: 3500000, // Revenue (3.5M)
-    activeDeliveries: 23,
-    pendingOrders: 12
+    totalUsers: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    activeDeliveries: 0,
+    pendingOrders: 0
   };
+
+  isLoading = true;
 
   recentOrders: Order[] = [
     {
@@ -94,40 +97,36 @@ export class AdminDashboardComponent {
     }
   ];
 
-  recentUsers: User[] = [
-    {
-      id: 123,
-      name: 'Sophie Martin',
-      email: 'sophie.martin@email.com',
-      role: 'client',
-      status: 'actif',
-      createdAt: new Date('2025-11-27T10:15:00')
-    },
-    {
-      id: 456,
-      name: 'Marc Dubois',
-      email: 'marc.dubois@email.com',
-      role: 'livreur',
-      status: 'actif',
-      createdAt: new Date('2025-11-26T16:20:00')
-    },
-    {
-      id: 789,
-      name: 'Laura Petit',
-      email: 'laura.petit@email.com',
-      role: 'client',
-      status: 'actif',
-      createdAt: new Date('2025-11-25T09:30:00')
-    },
-    {
-      id: 321,
-      name: 'Thomas Bernard',
-      email: 'thomas.bernard@email.com',
-      role: 'client',
-      status: 'inactif',
-      createdAt: new Date('2025-11-24T14:45:00')
-    }
-  ];
+  recentOrders: Order[] = [];
+  recentUsers: User[] = [];
+
+  constructor(private adminService: AdminService) {}
+
+  ngOnInit() {
+    this.loadDashboardData();
+  }
+
+  loadDashboardData() {
+    this.isLoading = true;
+    this.adminService.getDashboardStats().subscribe({
+      next: (data) => {
+        this.stats = {
+          totalUsers: data.totalUsers,
+          totalOrders: data.totalOrders,
+          totalRevenue: data.totalRevenue,
+          activeDeliveries: data.activeDeliveries,
+          pendingOrders: data.pendingOrders
+        };
+        this.recentOrders = data.recentOrders as any;
+        this.recentUsers = data.recentUsers as any;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading dashboard data:', error);
+        this.isLoading = false;
+      }
+    });
+  }
 
   quickActions = [
     { icon: 'fas fa-plus', title: 'Ajouter Produit', route: '/admin/products/add', color: '#3498db' },
