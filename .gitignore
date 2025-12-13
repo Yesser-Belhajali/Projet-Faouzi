@@ -1,0 +1,225 @@
+# ===== DELIVERY EXPRESS PROJECT =====
+# Full-stack Angular + Node.js/Express.js application
+
+# ===== NODE.JS & NPM =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ===== ANGULAR SPECIFIC =====
+# Build outputs
+.angular/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# Angular CLI cache
+.angular/cache/
+
+# ===== TYPESCRIPT =====
+*.tsbuildinfo
+
+# ===== DEVELOPMENT TOOLS =====
+# Package managers
+.npm
+.yarn/
+.pnp.*
+.yarn/install-state.gz
+
+# ESLint cache
+.eslintcache
+
+# Prettier cache
+.prettiercache
+
+# ===== TESTING & COVERAGE =====
+coverage/
+*.lcov
+.nyc_output
+
+# Test results
+junit.xml
+test-results.xml
+
+# ===== BUILD TOOLS =====
+.grunt
+bower_components
+jspm_packages/
+.lock-wscript
+build/Release
+
+# ===== RUNTIME DATA =====
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# ===== ENVIRONMENT & SECRETS =====
+# Environment files (NEVER commit secrets!)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.*.local
+
+# API Keys & Secrets
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Database credentials
+db.json
+database.json
+
+# ===== DEPLOYMENT & CI/CD =====
+# Docker
+.dockerignore
+Dockerfile.prod
+
+# Deployment configs with secrets
+deploy/
+deployment/
+
+# CI/CD secrets
+.github/workflows/*.secrets.yml
+
+# ===== LOGS & MONITORING =====
+logs/
+*.log
+access.log
+error.log
+combined.log
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== ANGULAR SPECIFIC =====
+.sass-cache/
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
+
+# E2E testing
+/e2e/*.js
+/e2e/*.map
+e2e/reports/
+
+# Profiling files
+chrome-profiler-events*.json
+speed-measure-plugin*.json
+
+# ===== BACKEND SPECIFIC =====
+# Uploads & user content
+backend/uploads/
+uploads/
+public/uploads/
+static/uploads/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+data/
+
+# SSL certificates
+*.crt
+*.csr
+
+# ===== PRODUCTION & DEPLOYMENT =====
+# Build artifacts
+build/
+dist-prod/
+release/
+
+# PM2 process manager
+ecosystem.config.js
+.pm2/
+
+# ===== GITHUB SPECIFIC =====
+# GitHub Codespaces
+.devcontainer/
+.vscode/settings.json
+
+# GitHub Actions cache
+.github/.cache/
+
+# ===== BACKUPS & TEMP =====
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+cache/
+
+# ===== SECURITY & COMPLIANCE =====
+# Security scan results
+.snyk
+.njsscan
+security-audit.json
+
+# License files (if auto-generated)
+LICENSE.generated
+NOTICE.generated
