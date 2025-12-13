@@ -205,9 +205,11 @@ router.post('/register', async (req, res) => {
       };
     } else if (role === 'provider') {
       // Insert into magasin table
+      const { rue, ville, code_postal, complement } = req.body;
+      
       const result = await db.query(
-        'INSERT INTO magasin (nom, email, mot_de_passe, tel, type, adresse) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [storeName || name, email, hashedPassword, phone || null, storeCategory || 'restaurant', address || null]
+        'INSERT INTO magasin (nom, email, mot_de_passe, tel, type, ville_magasin, gouv_magasin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [storeName || name, email, hashedPassword, phone || null, storeCategory || 'restaurant', ville || null, complement || null]
       );
       userId = result.rows[0].id_magazin;
       userRecord = {
@@ -224,11 +226,14 @@ router.post('/register', async (req, res) => {
       const [prenom, ...nomParts] = clientName.split(' ');
       const nom = nomParts.join(' ') || prenom;
       
-      console.log('💾 Inserting client with data:', { nom, prenom: firstName || prenom, email, phone, address });
+      // Extract address components
+      const { rue, ville, code_postal, complement } = req.body;
+      
+      console.log('💾 Inserting client with data:', { nom, prenom: firstName || prenom, email, phone, ville, rue });
       
       const result = await db.query(
-        'INSERT INTO client (nom, prenom, email, mot_de_passe, tel, role, adresse_client) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-        [nom, firstName || prenom, email, hashedPassword, phone || null, 'CLIENT', address || null]
+        'INSERT INTO client (nom, prenom, email, mot_de_passe, tel, role, ville_client, gouv_client) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+        [nom, firstName || prenom, email, hashedPassword, phone || null, 'CLIENT', ville || null, complement || null]
       );
       
       console.log('✅ Client insert successful:', result.rows[0]);

@@ -27,16 +27,14 @@
   flex-shrink: 0;
 }
 
-.logo-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  object-fit: cover;
-  box-shadow: 0 6px 16px rgba(63, 131, 248, 0.2);
+.logo-emoji {
+  font-size: 3.5rem;
+  line-height: 1;
   transition: transform 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.logo-icon:hover {
+.logo-emoji:hover {
   transform: scale(1.05);
 }
 

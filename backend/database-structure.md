@@ -20,11 +20,13 @@ CREATE TABLE client (
     nom VARCHAR NOT NULL,
     prenom VARCHAR NOT NULL,
     mot_de_passe VARCHAR NOT NULL,
-    role VARCHAR NOT NULL DEFAULT 'CLIENT'
+    role VARCHAR NOT NULL DEFAULT 'CLIENT',
+    gouv_client VARCHAR,
+    ville_client VARCHAR
 );
 ```
 **Purpose:** Store customer information and authentication  
-**Key Fields:** email (unique), role (CLIENT/ADMIN)
+**Key Fields:** email (unique), role (CLIENT/ADMIN), gouv_client (governorate), ville_client (city)
 
 ---
 
@@ -36,11 +38,13 @@ CREATE TABLE magasin (
     email VARCHAR NOT NULL,
     mot_de_passe VARCHAR NOT NULL,
     tel INTEGER,
-    type VARCHAR
+    type VARCHAR,
+    gouv_magasin VARCHAR,
+    ville_magasin VARCHAR
 );
 ```
 **Purpose:** Store information for restaurants, pharmacies, shops  
-**Key Fields:** type (RESTAURANT/PHARMACY/BOUTIQUE)
+**Key Fields:** type (RESTAURANT/PHARMACY/BOUTIQUE), gouv_magasin (governorate), ville_magasin (city)
 
 ---
 
@@ -55,11 +59,12 @@ CREATE TABLE livreur (
     tel INTEGER,
     vehicule VARCHAR,
     ville_livraison VARCHAR,
-    disponibilite TIME
+    disponibilite TIME,
+    gouv_livreur VARCHAR
 );
 ```
 **Purpose:** Manage delivery drivers and their availability  
-**Key Fields:** vehicule (SCOOTER/CAR), disponibilite (working hours)
+**Key Fields:** vehicule (SCOOTER/CAR), disponibilite (working hours), gouv_livreur (governorate)
 
 ---
 
@@ -70,11 +75,14 @@ CREATE TABLE produit (
     nom VARCHAR NOT NULL,
     description TEXT,
     prix BIGINT NOT NULL,
-    id_magazin INTEGER NOT NULL
+    id_magazin INTEGER NOT NULL,
+    image_url VARCHAR,
+    categorie_id INTEGER
 );
 ```
 **Purpose:** Product listings for all stores  
-**Foreign Key:** id_magazin → magasin.id_magazin
+**Foreign Key:** id_magazin → magasin.id_magazin  
+**Key Fields:** image_url (product image), categorie_id (category reference)
 
 ---
 
@@ -118,29 +126,29 @@ CREATE TABLE livraison (
     heure_estimee TIME,
     status VARCHAR,
     id_cmd INTEGER NOT NULL,
-    id_liv INTEGER NOT NULL
+    id_liv INTEGER NOT NULL,
+    ville VARCHAR,
+    gouvernorat VARCHAR
 );
 ```
 **Purpose:** Track delivery progress and driver assignment  
 **Foreign Keys:**
 - id_cmd → commande.id_cmd
-- id_liv → livreur.id_liv
+- id_liv → livreur.id_liv  
+**Location Fields:** ville (city), gouvernorat (governorate)
 
 ---
 
-### 🏠 ADRESSE (Customer Addresses)
+### �️ CATEGORIE (Product Categories)
 ```sql
-CREATE TABLE adresse (
-    id_adr INTEGER PRIMARY KEY DEFAULT nextval('adresse_id_adr_seq'),
-    code_postal INTEGER NOT NULL,
-    ville VARCHAR NOT NULL,
-    complement VARCHAR,
-    rue VARCHAR NOT NULL,
-    id_client INTEGER NOT NULL
+CREATE TABLE categorie (
+    id INTEGER PRIMARY KEY DEFAULT nextval('categorie_id_seq'),
+    nom VARCHAR NOT NULL,
+    type USER-DEFINED NOT NULL
 );
 ```
-**Purpose:** Store multiple addresses per customer  
-**Foreign Key:** id_client → client.id_client
+**Purpose:** Define product categories for classification  
+**Key Fields:** nom (category name), type (category type)
 
 ---
 
@@ -162,17 +170,16 @@ CREATE TABLE avis (
 ## 🔗 Database Relationships
 
 ```
-CLIENT (1) ──── (N) ADRESSE
-   │
-   └─── (1) ──── (N) COMMANDE
-                    │
-                    ├─── (1) ──── (N) LIGNE_COMMANDE ──── (N) ──── (1) PRODUIT
-                    │                                                   │
-                    ├─── (1) ──── (1) LIVRAISON ──── (N) ──── (1) LIVREUR
-                    │
-                    └─── (1) ──── (1) AVIS
+CLIENT (1) ──── (N) COMMANDE
+                  │
+                  ├─── (1) ──── (N) LIGNE_COMMANDE ──── (N) ──── (1) PRODUIT
+                  │                                                   │
+                  ├─── (1) ──── (1) LIVRAISON ──── (N) ──── (1) LIVREUR
+                  │
+                  └─── (1) ──── (1) AVIS
 
 MAGASIN (1) ──── (N) PRODUIT
+CATEGORIE (1) ──── (N) PRODUIT
 ```
 
 ## 📱 Application Flow
@@ -181,9 +188,34 @@ MAGASIN (1) ──── (N) PRODUIT
 3. **LIVRAISON** assigned to **LIVREUR**
 4. Delivery completed, **AVIS** created for feedback
 
+## 🔐 Authentication & User Management
+
+### User Registration Process
+- **CLIENT**: Stored in `client` table + address in `adresse` table
+- **MAGASIN**: Stored in `magasin` table with store address in `adresse` field
+- **LIVREUR**: Stored in `livreur` table with city information
+
+### Password Security
+- All passwords hashed using **bcryptjs** (salt rounds: 10)
+- JWT tokens for session management
+- Role-based access control
+
+### Address Structure
+```sql
+-- For clients: separate adresse table with structured fields
+INSERT INTO adresse (rue, ville, code_postal, complement, id_client)
+VALUES ('123 Main St', 'Paris', '75001', 'Apt 4B', 1);
+
+-- For stores: formatted address string in magasin table
+UPDATE magasin SET adresse = '456 Business Ave, Lyon 69001' WHERE id_magazin = 1;
+```
+
 ## 🎯 Current Status
 - ✅ All tables created with proper constraints
 - ✅ Primary keys and sequences configured
+- ✅ Authentication system implemented with bcryptjs + JWT
+- ✅ Address structure supports both clients (structured) and stores (formatted)
+- ✅ Product filtering by type (restaurant, boutique, pharmacie, courses)
 - ✅ Foreign key relationships established
 - 📋 All tables currently empty (ready for data)
 

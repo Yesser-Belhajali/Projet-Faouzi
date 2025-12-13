@@ -28,8 +28,7 @@
 
 /* Customer Background - Blue gradient with image */
 .signup-container.customer-bg {
-  background: linear-gradient(135deg, rgba(224, 242, 254, 0.3) 0%, rgba(186, 230, 253, 0.3) 50%, rgba(125, 211, 252, 0.3) 100%),
-              url('/customer-bg.jpg');
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.3) 0%, rgba(186, 230, 253, 0.3) 50%, rgba(125, 211, 252, 0.3) 100%) !important;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -41,10 +40,9 @@
     radial-gradient(circle at 80% 80%, rgba(125, 211, 252, 0.05) 0%, transparent 50%);
 }
 
-/* Delivery Background - Orange gradient with image */
+/* Delivery Background - Orange gradient */
 .signup-container.delivery-bg {
-  background: linear-gradient(135deg, rgba(254, 215, 170, 0.3) 0%, rgba(253, 186, 116, 0.3) 50%, rgba(251, 146, 60, 0.3) 100%),
-              url('/delivery-bg.jpg');
+  background: linear-gradient(135deg, rgba(254, 215, 170, 0.9) 0%, rgba(253, 186, 116, 0.8) 50%, rgba(251, 146, 60, 0.7) 100%) !important;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -57,10 +55,9 @@
     radial-gradient(circle at 80% 80%, rgba(253, 186, 116, 0.05) 0%, transparent 50%);
 }
 
-/* Provider Background - Colorful delivery illustration */
+/* Provider Background - Green gradient */
 .signup-container.provider-bg {
-  background: linear-gradient(135deg, rgba(209, 250, 229, 0.25) 0%, rgba(167, 243, 208, 0.25) 50%, rgba(110, 231, 183, 0.25) 100%),
-              url('/abcd.jpg') !important;
+  background: linear-gradient(135deg, rgba(209, 250, 229, 0.9) 0%, rgba(167, 243, 208, 0.8) 50%, rgba(110, 231, 183, 0.7) 100%) !important;
   background-size: cover !important;
   background-position: center !important;
   background-attachment: fixed !important;

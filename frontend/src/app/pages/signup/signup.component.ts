@@ -1,46 +1,46 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })
 export class SignupComponent {
-  firstName: string = '';
-  lastName: string = '';
+  // Common fields for all account types
+  firstName: string = '';        // prenom in DB
+  lastName: string = '';         // nom in DB
   email: string = '';
   password: string = '';
-  phone: string = '';
+  phone: string = '';            // tel in DB
   accountType: 'customer' | 'delivery' | 'provider' = 'customer';
   isLoading: boolean = false;
   errorMessage: string = '';
 
-  // Address fields (matching database structure)
-  rue: string = '';           // street
-  ville: string = '';         // city
-  code_postal: string = '';   // postal code
-  complement: string = '';    // additional info
+  // Location fields (matching actual DB structure)
+  ville: string = '';            // ville_client/ville_livraison/ville_magasin
+  gouvernorat: string = '';      // gouv_client/gouv_livreur/gouv_magasin
 
-  // Provider specific fields
-  storeName: string = '';
-  storeCategory: string = '';
-  storeCategories = ['restaurant', 'pharmacie', 'courses', 'boutique'];
+  // Provider/Store specific fields (magasin table)
+  storeName: string = '';        // nom in magasin table
+  storeType: string = '';        // type in magasin table
+  storeTypes = ['restaurant', 'pharmacie', 'boutique', 'courses'];
   
-  // Delivery partner specific fields
-  city: string = '';
-  availabilityTime: string = '';
-  availabilityOptions = [
-    'Morning (6:00 AM - 12:00 PM)',
-    'Afternoon (12:00 PM - 6:00 PM)', 
-    'Evening (6:00 PM - 12:00 AM)',
-    'Night (12:00 AM - 6:00 AM)',
-    'Full Day (24/7)'
+  // Delivery partner specific fields (livreur table)
+  vehicule: string = '';         // vehicule in livreur table
+  ville_livraison: string = ''; // ville_livraison in livreur table
+  disponibilite: string = '';   // disponibilite in livreur table
+  
+  vehiculeOptions = ['Scooter', 'Moto', 'Voiture', 'Vélo'];
+  disponibiliteOptions = [
+    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+    '18:00', '19:00', '20:00', '21:00', '22:00'
   ];
 
   constructor(
@@ -51,55 +51,50 @@ export class SignupComponent {
   onSubmit() {
     this.errorMessage = '';
     
-    // Validation based on account type
+    // Basic validation for different account types
     if (this.accountType === 'provider') {
-      if (!this.storeName || !this.storeCategory || !this.rue || !this.ville || !this.code_postal || !this.phone || !this.email || !this.password) {
-        this.errorMessage = 'Please fill in all required fields';
-        return;
-      }
-    } else if (this.accountType === 'delivery') {
-      if (!this.firstName || !this.lastName || !this.rue || !this.ville || !this.code_postal || !this.city || !this.availabilityTime || !this.phone || !this.email || !this.password) {
-        this.errorMessage = 'Please fill in all required fields';
+      // Providers (magasin table) only need: nom, email, password (tel, type, gouvernorat, ville are optional)
+      if (!this.storeName || !this.email || !this.password) {
+        this.errorMessage = 'Please fill in all required fields (Store Name, Email, Password)';
         return;
       }
     } else {
-      if (!this.firstName || !this.lastName || !this.rue || !this.ville || !this.code_postal || !this.phone || !this.email || !this.password) {
-        this.errorMessage = 'Please fill in all required fields';
+      // Clients and livreurs need: nom, prenom, email, password (tel, gouvernorat, ville are optional)
+      if (!this.firstName || !this.lastName || !this.email || !this.password) {
+        this.errorMessage = 'Please fill in all required fields (First Name, Last Name, Email, Password)';
         return;
       }
     }
 
     this.isLoading = true;
     
-    // Build comprehensive signup data with proper address structure
-    const address = `${this.rue}, ${this.ville} ${this.code_postal}${this.complement ? ', ' + this.complement : ''}`;
-    
+    // Build signup data matching backend API expectations
     const signupData: any = {
       email: this.email,
       password: this.password,
-      role: this.accountType === 'delivery' ? 'livreur' : 
-            this.accountType === 'provider' ? 'provider' : 'client',
-      phone: this.phone,
-      address: address,
-      rue: this.rue,
-      ville: this.ville,
-      code_postal: this.code_postal,
-      complement: this.complement
+      phone: this.phone || null,
+      role: this.accountType === 'customer' ? 'client' : this.accountType
     };
 
+    // Add fields based on account type matching backend expectations
     if (this.accountType === 'provider') {
+      // magasin table fields - backend expects storeName and storeCategory
       signupData.storeName = this.storeName;
-      signupData.storeCategory = this.storeCategory;
-      signupData.name = this.storeName;
-    } else {
+      signupData.storeCategory = this.storeType || 'restaurant';
+      signupData.ville = this.ville || null;
+      signupData.complement = this.gouvernorat || null; // Backend uses complement for gouv_magasin
+    } else if (this.accountType === 'delivery') {
+      // livreur table fields - backend expects firstName, lastName, city
       signupData.firstName = this.firstName;
       signupData.lastName = this.lastName;
-      signupData.name = `${this.firstName} ${this.lastName}`;
-      
-      if (this.accountType === 'delivery') {
-        signupData.city = this.city;
-        signupData.availabilityTime = this.availabilityTime;
-      }
+      signupData.city = this.ville_livraison || null;
+      signupData.availabilityTime = this.disponibilite || null;
+    } else if (this.accountType === 'customer') {
+      // client table fields - backend expects firstName, lastName, ville, complement
+      signupData.firstName = this.firstName;
+      signupData.lastName = this.lastName;
+      signupData.ville = this.ville || null;
+      signupData.complement = this.gouvernorat || null; // Backend uses complement for gouv_client
     }
     
     console.log('📤 Sending registration data:', signupData);

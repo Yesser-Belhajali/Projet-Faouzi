@@ -15,6 +15,7 @@ export class SigninComponent {
   email: string = '';
   password: string = '';
   isLoading: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private router: Router,
@@ -22,28 +23,54 @@ export class SigninComponent {
   ) {}
 
   onSubmit() {
+    this.errorMessage = '';
+    
     if (!this.email || !this.password) {
-      alert('Please fill in all fields');
+      this.errorMessage = 'Please fill in all fields';
       return;
     }
 
     this.isLoading = true;
     
+    console.log('🔐 Attempting login for:', this.email);
+    
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: (response) => {
         this.isLoading = false;
+        console.log('✅ Login response:', response);
+        
         if (response.success && response.token) {
           this.authService.saveToken(response.token);
-          alert(`Welcome back! Signed in as ${this.email}`);
-          this.router.navigate(['/']);
+          console.log('🎉 Login successful, navigating to home...');
+          
+          // Navigate based on user role
+          const userRole = response.user?.role?.toLowerCase();
+          if (userRole === 'admin') {
+            this.router.navigate(['/admin']);
+          } else if (userRole === 'provider') {
+            this.router.navigate(['/provider']);
+          } else if (userRole === 'livreur') {
+            this.router.navigate(['/delivery']);
+          } else {
+            this.router.navigate(['/']);
+          }
         } else {
-          alert('Login failed. Please try again.');
+          this.errorMessage = response.message || 'Login failed. Please try again.';
         }
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Login error:', error);
-        alert('Login failed. Please check your credentials and try again.');
+        console.error('❌ Login error:', error);
+        
+        if (error.status === 0) {
+          this.errorMessage = 'Cannot connect to server. Please check your internet connection.';
+        } else if (error.error?.error) {
+          this.errorMessage = error.error.error;
+        } else if (error.error?.message) {
+          this.errorMessage = error.error.message;
+        } else {
+          this.errorMessage = 'Login failed. Please check your credentials and try again.';
+        }
       }
     });
   }
