@@ -10,9 +10,29 @@
 
   <div class="content-section">
     <div class="container">
-      <div class="products-grid">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des produits...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="error-state">
+        <p>{{ error }}</p>
+        <button (click)="loadProducts()" class="retry-btn">Réessayer</button>
+      </div>
+
+      <!-- Products Grid -->
+      <div *ngIf="!loading && !error" class="products-grid">
+        <!-- Empty State -->
+        <div *ngIf="products.length === 0" class="empty-state">
+          <h3>Aucun produit disponible</h3>
+          <p>Il n'y a pas de produits de restaurant disponibles pour le moment.</p>
+        </div>
+
+        <!-- Products -->
         <div *ngFor="let product of products" class="product-card">
-          <div class="product-image">{{ product.image }}</div>
+          <div class="product-image">{{ getProductEmoji(product.name) }}</div>
           
           <div class="product-info">
             <span class="restaurant-name">{{ product.restaurant }}</span>

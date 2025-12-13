@@ -97,7 +97,6 @@ export class AdminDashboardComponent implements OnInit {
     }
   ];
 
-  recentOrders: Order[] = [];
   recentUsers: User[] = [];
 
   constructor(private adminService: AdminService) {}

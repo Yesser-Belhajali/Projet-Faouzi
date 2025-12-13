@@ -8,10 +8,11 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  category: string;
-  image: string;
-  available: boolean;
-  stock: number;
+  restaurant: string;
+  type: string;
+  store_id: number;
+  image?: string;
+  available?: boolean;
 }
 
 export interface ProductsResponse {
@@ -19,6 +20,7 @@ export interface ProductsResponse {
   total: number;
   page: number;
   totalPages: number;
+  hasMore: boolean;
 }
 
 @Injectable({
@@ -30,7 +32,7 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   getProducts(filters?: {
-    category?: string;
+    type?: string;
     available?: boolean;
     search?: string;
     page?: number;
@@ -38,7 +40,7 @@ export class ProductService {
   }): Observable<ProductsResponse> {
     let params = new HttpParams();
     
-    if (filters?.category) params = params.set('category', filters.category);
+    if (filters?.type) params = params.set('type', filters.type);
     if (filters?.available !== undefined) params = params.set('available', filters.available.toString());
     if (filters?.search) params = params.set('search', filters.search);
     if (filters?.page) params = params.set('page', filters.page.toString());
@@ -65,5 +67,18 @@ export class ProductService {
 
   deleteProduct(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  // Helper methods for specific types
+  getRestaurantProducts(): Observable<ProductsResponse> {
+    return this.getProducts({ type: 'restaurant' });
+  }
+
+  getPharmacyProducts(): Observable<ProductsResponse> {
+    return this.getProducts({ type: 'pharmacy' });
+  }
+
+  getBoutiqueProducts(): Observable<ProductsResponse> {
+    return this.getProducts({ type: 'boutique' });
   }
 }

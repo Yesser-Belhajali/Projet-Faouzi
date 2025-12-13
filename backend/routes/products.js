@@ -1,85 +1,132 @@
 const express = require('express');
 const router = express.Router();
+const database = require('../config/database');
 
-// Mock products data
-let products = [
-  {
-    id: 1,
-    name: 'Pizza Margherita',
-    description: 'Pizza classique avec tomate, mozzarella et basilic',
-    price: 15.90,
-    category: 'restaurant',
-    image: '/images/pizza-margherita.jpg',
-    available: true,
-    stock: 50
-  },
-  {
-    id: 2,
-    name: 'Coca Cola 33cl',
-    description: 'Boisson gazeuse',
-    price: 3.50,
-    category: 'restaurant',
-    image: '/images/coca-cola.jpg',
-    available: true,
-    stock: 100
-  },
-  {
-    id: 3,
-    name: 'T-Shirt Blanc',
-    description: 'T-shirt en coton 100% blanc taille M',
-    price: 19.99,
-    category: 'boutique',
-    image: '/images/tshirt-blanc.jpg',
-    available: true,
-    stock: 25
-  },
-  {
-    id: 4,
-    name: 'Paracétamol 1000mg',
-    description: 'Médicament contre la douleur et la fièvre',
-    price: 2.50,
-    category: 'pharmacie',
-    image: '/images/paracetamol.jpg',
-    available: true,
-    stock: 200
-  }
-];
+// Get database connection
+function getDB() {
+  return database.getPool();
+}
 
-// GET /api/products - Get all products
-router.get('/', (req, res) => {
-  const { category, available, search, page = 1, limit = 20 } = req.query;
-  
-  let filteredProducts = products;
-  
-  // Filter by category
-  if (category) {
-    filteredProducts = filteredProducts.filter(product => product.category === category);
+// GET /api/products - Get all products from database
+router.get('/', async (req, res) => {
+  try {
+    const { type, available, search, page = 1, limit = 20 } = req.query;
+    
+    console.log(`🔍 Products API called with params:`, { type, available, search, page, limit });
+    console.log(`🎯 Type filter received: "${type}" (typeof: ${typeof type})`);
+    
+    // Build dynamic SQL query
+    let query = `
+      SELECT 
+        p.id_produit as id,
+        p.nom as name,
+        p.description,
+        p.prix as price,
+        m.nom as restaurant,
+        m.type as type,
+        m.id_magazin as store_id
+      FROM produit p
+      JOIN magasin m ON p.id_magazin = m.id_magazin
+      WHERE 1=1
+    `;
+    
+    const queryParams = [];
+    let paramIndex = 1;
+    
+    // Add filters with explicit type checking
+    if (type && type.trim() !== '') {
+      const typeFilter = type.trim().toLowerCase();
+      query += ` AND LOWER(m.type) = $${paramIndex}`;
+      queryParams.push(typeFilter);
+      paramIndex++;
+      console.log(`📝 Adding type filter: "${typeFilter}" as parameter $${paramIndex-1}`);
+    } else {
+      console.log(`⚠️ No type filter applied - type is: "${type}"`);
+    }
+    
+    if (search) {
+      query += ` AND (LOWER(p.nom) LIKE LOWER($${paramIndex}) OR LOWER(p.description) LIKE LOWER($${paramIndex + 1}))`;
+      queryParams.push(`%${search}%`);
+      queryParams.push(`%${search}%`);
+      paramIndex += 2;
+    }
+    
+    // Add pagination
+    const offset = (page - 1) * limit;
+    query += ` ORDER BY p.nom LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    queryParams.push(parseInt(limit));
+    queryParams.push(offset);
+    
+    // Execute query
+    const db = getDB();
+    const result = await db.query(query, queryParams);
+    console.log(`✅ Found ${result.rows.length} products`);
+    
+    // Debug: show first few products and their types
+    if (result.rows.length > 0) {
+      console.log('🔍 Sample products returned:');
+      result.rows.slice(0, 5).forEach(product => {
+        console.log(`  - ${product.name} (${product.restaurant}) - Type: ${product.type}`);
+      });
+    }
+    
+    // Get total count for pagination
+    let countQuery = `
+      SELECT COUNT(*) as total
+      FROM produit p
+      JOIN magasin m ON p.id_magazin = m.id_magazin
+      WHERE 1=1
+    `;
+    
+    const countParams = [];
+    let countParamIndex = 1;
+    
+    if (type) {
+      countQuery += ` AND LOWER(m.type) = LOWER($${countParamIndex})`;
+      countParams.push(type);
+      countParamIndex++;
+    }
+    
+    if (search) {
+      countQuery += ` AND (LOWER(p.nom) LIKE LOWER($${countParamIndex}) OR LOWER(p.description) LIKE LOWER($${countParamIndex + 1}))`;
+      countParams.push(`%${search}%`);
+      countParams.push(`%${search}%`);
+    }
+    
+    console.log(`🗃️ Executing query:`, query);
+    console.log(`📊 Query params:`, queryParams);
+    console.log(`🔍 Full query with params:`, query.replace(/\$(\d+)/g, (match, num) => `'${queryParams[num-1]}'`));
+    
+    const countResult = await db.query(countQuery, countParams);
+    const total = parseInt(countResult.rows[0].total);
+    
+    // Format products with proper price conversion
+    const products = result.rows.map(product => ({
+      ...product,
+      price: parseFloat(product.price) / 100, // Convert from cents to currency
+      image: `/images/products/${product.name.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+      available: true
+    }));
+    
+    console.log(`📦 Returning ${products.length} products out of ${total} total`);
+    
+    res.json({
+      products,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      hasMore: (page * limit) < total
+    });
+    
+  } catch (error) {
+    console.error('❌ Error fetching products:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({
+      error: 'Failed to fetch products',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  
-  // Filter by availability
-  if (available !== undefined) {
-    filteredProducts = filteredProducts.filter(product => product.available === (available === 'true'));
-  }
-  
-  // Search by name or description
-  if (search) {
-    filteredProducts = filteredProducts.filter(product => 
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.description.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-  
-  // Pagination
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + parseInt(limit);
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
-  
-  res.json({
-    products: paginatedProducts,
-    total: filteredProducts.length,
-    page: parseInt(page),
-    totalPages: Math.ceil(filteredProducts.length / limit)
-  });
 });
 
 // GET /api/products/:id - Get product by ID
