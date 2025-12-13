@@ -5,8 +5,14 @@
     <p>Découvrez nos produits tendance</p>
   </div>
 
-  <!-- Filtres par catégorie -->
-  <div class="category-filters">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Chargement des produits de la boutique...</p>
+  </div>
+
+  <!-- Filtres par catégorie - Only show after loading -->
+  <div *ngIf="!isLoading && dataLoaded" class="category-filters">
     <button 
       *ngFor="let category of categories"
       class="filter-btn"
@@ -16,29 +22,23 @@
     </button>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-state">
-    <div class="loading-spinner"></div>
-    <p>Chargement des produits de la boutique...</p>
-  </div>
-
   <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="error-state">
+  <div *ngIf="error && !isLoading && dataLoaded" class="error-state">
     <i class="fas fa-exclamation-triangle"></i>
     <p>{{ error }}</p>
-    <button class="retry-btn" (click)="loadProducts()">
+    <button class="retry-btn" (click)="loadBoutiqueCategoriesFromDB()">
       <i class="fas fa-redo"></i> Réessayer
     </button>
   </div>
 
   <!-- No Products State -->
-  <div *ngIf="!isLoading && !error && filteredProducts.length === 0" class="empty-state">
+  <div *ngIf="!isLoading && dataLoaded && !error && filteredProducts.length === 0" class="empty-state">
     <i class="fas fa-shopping-bag"></i>
     <p>Aucun produit disponible dans cette catégorie</p>
   </div>
 
   <!-- Grille de produits -->
-  <div class="products-grid" *ngIf="!isLoading && !error && filteredProducts.length > 0">
+  <div class="products-grid" *ngIf="!isLoading && dataLoaded && !error && filteredProducts.length > 0">
     <div class="product-card" *ngFor="let product of filteredProducts">
       <div class="product-image">
         <div class="product-placeholder">

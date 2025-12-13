@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductService, Product } from '../../services/product.service';
@@ -17,43 +17,125 @@ interface BoutiqueProduct extends Product {
 })
 export class BoutiqueComponent implements OnInit {
   
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private cdr: ChangeDetectorRef
+  ) {}
   products: BoutiqueProduct[] = [];
-  isLoading = true;
+  isLoading = true;  // Start with true to show loading spinner
   error = '';
+  dataLoaded = false;  // Track if initial data has been loaded
   
-  ngOnInit() {
-    this.loadProducts();
+
+  
+  initializeFallbackCategories() {
+    console.log('🔧 Categories already initialized');
+    console.log('🏷️ Current categories:', this.categories);
+    console.log('🏷️ Current selected category:', this.selectedCategory);
   }
   
-  loadProducts() {
+  ngOnInit() {
+    console.log('🚀 Initializing boutique component');
+    console.log('🏷️ Initial categories:', this.categories);
+    console.log('🏷️ Initial selectedCategory:', this.selectedCategory);
+    
+    // Force immediate change detection to ensure proper initialization
+    this.cdr.detectChanges();
+    
+    // Load products immediately - categories are already initialized
+    this.loadAllBoutiqueProducts();
+    
+    // Load database categories in parallel (won't affect product display)
+    this.loadBoutiqueCategoriesFromDB();
+  }
+  
+  loadBoutiqueCategoriesFromDB() {
+    console.log('🔍 Loading boutique categories from database...');
+    
+    this.productService.getCategories('boutique').subscribe({
+      next: (response) => {
+        console.log('✅ Boutique categories API response:', response);
+        if (response && response.categories && response.categories.length > 0) {
+          // Get category names and add "All" button
+          const dbCategories = response.categories.map(cat => cat.name);
+          const newCategories = ['All', ...dbCategories];
+          
+          console.log('🏷️ Categories from DB:', dbCategories);
+          console.log('🏷️ New categories with All:', newCategories);
+          
+          // Only update categories if different, preserve selectedCategory
+          if (JSON.stringify(this.categories) !== JSON.stringify(newCategories)) {
+            this.categories = newCategories;
+            console.log('🏷️ Categories updated, keeping selectedCategory:', this.selectedCategory);
+            this.cdr.detectChanges();
+          }
+        } else {
+          console.log('⚠️ No categories from DB response, keeping fallback');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error loading boutique categories:', error);
+        console.log('🔧 Using fallback categories');
+      }
+    });
+  }
+  
+  loadAllBoutiqueProducts() {
+    console.log('📦 Loading all boutique products');
     this.isLoading = true;
     this.error = '';
     
     this.productService.getProducts({ type: 'boutique' }).subscribe({
       next: (response) => {
-        console.log('✅ Boutique products loaded:', response.products);
-        this.products = response.products.map(product => ({
-          ...product,
-          category: this.mapTypeToCategory(product.type),
-          store: product.restaurant || 'Boutique Store'
-        }));
+        console.log('✅ Boutique products API response:', response);
         
-        console.log('🔍 Mapped products:', this.products);
-        console.log('🏷️ Categories found:', [...new Set(this.products.map(p => p.category))]);
-        console.log('🔄 Setting isLoading to false...');
+        if (response && response.products) {
+          this.products = response.products.map(product => ({
+            ...product,
+            category: product.category_name || this.mapTypeToCategory(product.type),
+            store: product.restaurant || 'Boutique Store'
+          }));
+          
+          console.log('🔍 Mapped products count:', this.products.length);
+          console.log('🔍 First few products:', this.products.slice(0, 3));
+          console.log('🔍 Current selectedCategory:', this.selectedCategory);
+          console.log('🔍 filteredProducts will show:', this.filteredProducts.length);
+          
+          if (this.products.length === 0) {
+            console.log('⚠️ No boutique products found in database');
+            this.error = 'Aucun produit boutique trouvé dans la base de données';
+          } else {
+            this.error = ''; // Clear any previous errors
+          }
+        } else {
+          console.log('❌ Invalid response format:', response);
+          this.error = 'Réponse invalide du serveur';
+        }
         
         this.isLoading = false;
+        this.dataLoaded = true;
         
-        console.log('✅ isLoading is now:', this.isLoading);
-        console.log('📊 filteredProducts count:', this.filteredProducts.length);
+        // Set categories if not already set
+        if (this.categories.length === 0) {
+          this.categories = ['All', 'Vêtements', 'Chaussures', 'Accessoires', 'Électronique', 'Beauté', 'Bijoux'];
+        }
+        
+        // Force change detection to update the view
+        console.log('🔄 Triggering change detection...');
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('❌ Error loading boutique products:', error);
-        this.error = 'Erreur lors du chargement des produits';
+        console.error('❌ Full error details:', JSON.stringify(error, null, 2));
+        this.error = `Erreur lors du chargement des produits: ${error.message || 'Erreur inconnue'}`;
         this.isLoading = false;
       }
     });
+  }
+  
+  loadAllProducts() {
+    // This method is kept for retry functionality
+    this.loadBoutiqueCategoriesFromDB();
   }
   
   mapTypeToCategory(type: string): string {
@@ -76,18 +158,27 @@ export class BoutiqueComponent implements OnInit {
   }
 
   cart: BoutiqueProduct[] = [];
-  categories: string[] = ['Tous', 'Général', 'Vêtements', 'Chaussures', 'Accessoires', 'Électronique', 'Beauté', 'Bijoux', 'Autres'];
-  selectedCategory: string = 'Tous';
+  categories: string[] = [];  // Start empty, will be populated after loading
+  selectedCategory: string = 'All';
 
   get filteredProducts(): BoutiqueProduct[] {
     console.log('🔍 Filtering - selectedCategory:', this.selectedCategory);
     console.log('🔍 Total products:', this.products.length);
     
-    if (this.selectedCategory === 'Tous') {
-      console.log('📋 Returning all products:', this.products.length);
+    // Don't filter if no products are loaded yet or if "All" is selected
+    if (!this.products || this.products.length === 0) {
+      console.log('⚠️ No products loaded yet');
+      return [];
+    }
+    
+    if (!this.selectedCategory || this.selectedCategory === '' || this.selectedCategory === 'All') {
+      console.log('⚠️ Showing all products for "All" category');
       return this.products;
     }
-    const filtered = this.products.filter(product => product.category === this.selectedCategory);
+    
+    const filtered = this.products.filter(product => {
+      return product.category === this.selectedCategory;
+    });
     console.log('📋 Filtered products:', filtered.length);
     return filtered;
   }
@@ -114,12 +205,27 @@ export class BoutiqueComponent implements OnInit {
   }
 
   filterByCategory(category: string): void {
+    console.log('🔍 Filtering by category:', category);
     this.selectedCategory = category;
+    console.log('🏷️ Categories array:', this.categories);
+    console.log('🏷️ Selected category set to:', this.selectedCategory);
+    console.log('🔍 Current products count:', this.products.length);
+    
+    // If no products are loaded yet, load them now
+    if (!this.products || this.products.length === 0) {
+      console.log('⚠️ No products loaded, loading now...');
+      this.loadAllBoutiqueProducts();
+    } else {
+      // Force change detection when category changes
+      this.cdr.detectChanges();
+    }
   }
+  
+
 
   getProductEmoji(category: string): string {
     const emojiMap: { [key: string]: string } = {
-      'Général': '🛍️',
+      'All': '🛍️',
       'Vêtements': '👕',
       'Chaussures': '👟',
       'Accessoires': '👜',
