@@ -39,9 +39,9 @@ interface Stats {
 })
 export class AdminDashboardComponent {
   stats: Stats = {
-    totalUsers: 1847,
-    totalOrders: 3421,
-    totalRevenue: 87456.50,
+    totalUsers: 25100, // Product in stock
+    totalOrders: 43500, // Orders delivered
+    totalRevenue: 3500000, // Revenue (3.5M)
     activeDeliveries: 23,
     pendingOrders: 12
   };
