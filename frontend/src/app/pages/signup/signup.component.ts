@@ -89,8 +89,8 @@ export class SignupComponent {
       this.isLoading = false;
       const name = this.accountType === 'provider' ? this.storeName : `${this.firstName} ${this.lastName}`;
       alert(`Account created successfully for ${name}!`);
-      // Redirect to signin page
-      this.router.navigate(['/signin']);
+      // Redirect to home page
+      this.router.navigate(['/home']);
     }, 1000);
   }
 }
